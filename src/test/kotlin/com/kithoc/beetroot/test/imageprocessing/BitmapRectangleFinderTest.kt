@@ -1,4 +1,4 @@
-package com.kithoc.beetroot.test
+package com.kithoc.beetroot.test.imageprocessing
 
 import com.kithoc.beetroot.imageprocessing.BitmapRectangleFinder
 import com.kithoc.beetroot.imageprocessing.IntMatrix

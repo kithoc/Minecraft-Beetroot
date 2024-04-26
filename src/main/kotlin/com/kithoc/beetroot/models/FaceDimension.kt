@@ -1,5 +1,6 @@
 package com.kithoc.beetroot.models
 
+import com.kithoc.beetroot.util.ensure
 import com.kithoc.beetroot.vecmath.Cuboid6f
 import com.kithoc.beetroot.vecmath.Direction
 import com.kithoc.beetroot.vecmath.Vec2f
@@ -15,13 +16,16 @@ data class FaceDimension(
 
     companion object {
         operator fun invoke(direction: Direction, bounds: Cuboid6f) =
-            if (bounds.min[direction.axis] != bounds.max[direction.axis])
-                throw IllegalArgumentException()
-            else
+            ensure(
+                bounds.min[direction.axis] == bounds.max[direction.axis],
+                "faces must have zero depth",
+                ::IllegalArgumentException
+            ).run {
                 FaceDimension(
                     direction,
                     bounds.min,
                     Vec2f(bounds.size[direction.axis.u], bounds.size[direction.axis.v])
                 )
+            }
     }
 }

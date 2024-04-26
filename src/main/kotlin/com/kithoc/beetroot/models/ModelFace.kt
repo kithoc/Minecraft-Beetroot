@@ -1,15 +1,14 @@
 package com.kithoc.beetroot.models
 
+import com.kithoc.beetroot.util.ensure
 import com.kithoc.beetroot.vecmath.*
 
-@JvmRecord
 data class ModelFace(
     val dimension: FaceDimension,
     val textureName: String,
     val textureSize: Rectangle4f,
     val textureRotation: TextureAngle,
-    val rotationAxis: Axis3,
-    val rotationAngle: SpatialAngle,
+    val rotation: PartialRotation,
     val rescale: Boolean = false,
     val shade: Boolean = true,
     val cullFace: Direction? = null,
@@ -60,14 +59,16 @@ data class ModelFace(
     fun rotate(axis: Axis3, angle: Float): ModelFace {
         var a = angle % 360f
         if (a < 0f) a += 360f
-        if (a % 22.5f != 0f)
-            throw IllegalArgumentException(
-                "rotation angles must be a multiple of 22.5 degrees"
-            )
-        if (rotationAngle != SpatialAngle.VALUE_0 && angle % 90f != 0f && axis != rotationAxis)
-            throw IllegalArgumentException(
-                "models only support partial rotation around one axis, use `unrotate` to remove all partial rotations"
-            )
+        ensure(
+            a % 22.5f == 0f,
+            "rotation angles must be a multiple of 22.5 degrees",
+            ::IllegalArgumentException,
+        )
+        ensure(
+            rotation.angle == 0f || angle % 90f == 0f || axis == rotation.axis,
+            "models only support partial rotation around one axis, use `unrotate` to remove all partial rotations",
+            ::IllegalArgumentException,
+        )
         var result = this
         while (a >= 90f) {
             a -= 90f
@@ -75,8 +76,7 @@ data class ModelFace(
         }
         if (a != 0f) {
             result = result.copy(
-                rotationAxis = axis,
-                rotationAngle = SpatialAngle(rotationAngle.angle + a)!!
+                rotation = PartialRotation(axis, rotation.angle + a)!!
             )
         }
         return result

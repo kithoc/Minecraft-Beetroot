@@ -26,6 +26,9 @@ data class Model(
         }
     }
 
+    fun combine(vararg models: Model): Model =
+        copy(faces = buildSet { addAll(faces); models.forEach { addAll(it.faces) } })
+
     fun mapFaces(mapper: (ModelFace) -> ModelFace): Model =
         copy(faces = faces.map(mapper).toSet())
 
